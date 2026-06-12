@@ -1,65 +1,71 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-white">
+
+      {/* Hero */}
+      <section className="flex flex-col items-center justify-center text-center px-6 py-24 bg-[#1A3C5E]">
+        <h1 className="text-5xl font-bold text-white mb-4">
+          NorthStar
+        </h1>
+        <p className="text-xl text-blue-200 mb-8 max-w-xl">
+          Tu brújula interna, siempre disponible. Orientación vital con IA, gratis y en español.
+        </p>
+        <a href="/chat" className="bg-[#2E86C1] text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-blue-500 transition">
+          Comenzar ahora
+        </a>
+      </section>
+
+      {/* Cómo funciona */}
+      <section className="py-20 px-6 max-w-4xl mx-auto">
+        <h2 className="text-3xl font-bold text-center text-[#1A3C5E] mb-12">
+          ¿Cómo funciona?
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="text-center">
+            <div className="text-4xl mb-4">🎧</div>
+            <h3 className="text-xl font-semibold text-[#1A3C5E] mb-2">1. Te escuchamos</h3>
+            <p className="text-gray-600">Stella, nuestra IA, te hace preguntas para entender tu situación sin juzgarte.</p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-[#1A3C5E] mb-2">2. Reflexionamos juntos</h3>
+            <p className="text-gray-600">Identificamos tus valores, miedos y fortalezas para ver el camino con claridad.</p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl mb-4">🚀</div>
+            <h3 className="text-xl font-semibold text-[#1A3C5E] mb-2">3. Defines tu acción</h3>
+            <p className="text-gray-600">Sales con 3 pasos concretos y alcanzables para avanzar desde hoy.</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Áreas de vida */}
+      <section className="py-20 px-6 bg-gray-50">
+        <h2 className="text-3xl font-bold text-center text-[#1A3C5E] mb-12">
+          ¿En qué área necesitas orientación?
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+          {[
+            { emoji: "💼", label: "Carrera" },
+            { emoji: "❤️", label: "Relaciones" },
+            { emoji: "🧭", label: "Propósito" },
+            { emoji: "😊", label: "Bienestar" },
+            { emoji: "🎓", label: "Educación" },
+            { emoji: "✨", label: "Otra" },
+          ].map((area) => (
+            <div key={area.label} className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer">
+              <div className="text-4xl mb-3">{area.emoji}</div>
+              <p className="font-semibold text-[#1A3C5E]">{area.label}</p>
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 text-center text-gray-400 text-sm">
+        NorthStar © 2026 — Hecho con ❤️ por estudiantes
+      </footer>
+
+    </main>
   );
 }
