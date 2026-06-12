@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import groq from '@/lib/groq'
 import { STELLA_SYSTEM_PROMPT, CRISIS_KEYWORDS } from '@/lib/prompts'
 import { supabaseAdmin } from '@/lib/supabase'
+import { ratelimit } from '@/lib/ratelimit'
 
 type Message = {
   role: 'user' | 'assistant'
@@ -10,18 +11,28 @@ type Message = {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Leemos lo que nos manda el frontend
-    const { messages, sessionId } = await req.json()
+    // 1. Rate limiting
+    const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
+    const { success, remaining } = await ratelimit.limit(ip)
 
-    // 2. Validamos que venga el historial de mensajes
-    if (!messages || !Array.isArray(messages)) {
+    if (!success) {
       return NextResponse.json(
-        { error: 'El campo messages es requerido' },
+        { error: 'Demasiadas solicitudes, espera un momento.' },
+        { status: 429 }
+      )
+    }
+
+    // 2. Leemos el body
+    const { message, sessionId } = await req.json()
+
+    if (!message || typeof message !== 'string') {
+      return NextResponse.json(
+        { error: 'El campo message es requerido' },
         { status: 400 }
       )
     }
 
-    // 3. Si no viene sessionId, creamos una sesión nueva en Supabase
+    // 3. Creamos sesión nueva o usamos la existente
     let currentSessionId = sessionId
     if (!currentSessionId) {
       const { data, error } = await supabaseAdmin
@@ -34,32 +45,42 @@ export async function POST(req: NextRequest) {
       currentSessionId = data.id
     }
 
-    // 4. Detectamos si el último mensaje tiene palabras de crisis
-    const lastMessage = messages[messages.length - 1]?.content?.toLowerCase() || ''
+    // 4. Recuperamos el historial de la sesión desde Supabase
+    const { data: historial } = await supabaseAdmin
+      .from('messages')
+      .select('role, content')
+      .eq('session_id', currentSessionId)
+      .order('created_at', { ascending: true })
+      .limit(20) // máximo 20 mensajes anteriores
+
+    const historialPrevio: Message[] = historial || []
+
+    // 5. Detectamos crisis en el mensaje actual
+    const lastMessage = message.toLowerCase()
     const isCrisis = CRISIS_KEYWORDS.some(keyword =>
       lastMessage.includes(keyword)
     )
 
-    // 5. Le mandamos el historial a Groq con el prompt de Stella
+    // 6. Llamada a Groq con historial completo
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: STELLA_SYSTEM_PROMPT },
-        ...messages as Message[]
+        ...historialPrevio,
+        { role: 'user', content: message }
       ],
       max_tokens: 700,
       temperature: 0.78,
     })
 
-    // 6. Extraemos la respuesta
     const reply = completion.choices[0].message.content || ''
 
-    // 7. Guardamos el mensaje del usuario y la respuesta de Stella
+    // 7. Guardamos el nuevo mensaje y respuesta en Supabase
     await supabaseAdmin.from('messages').insert([
       {
         session_id: currentSessionId,
         role: 'user',
-        content: messages[messages.length - 1].content,
+        content: message,
       },
       {
         session_id: currentSessionId,
@@ -68,11 +89,12 @@ export async function POST(req: NextRequest) {
       }
     ])
 
-    // 8. Respondemos al frontend con la respuesta y el sessionId
+    // 8. Respondemos al frontend
     return NextResponse.json({
       reply,
       isCrisis,
-      sessionId: currentSessionId
+      sessionId: currentSessionId,
+      remainingRequests: remaining
     })
 
   } catch (error) {
