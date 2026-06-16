@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Leemos el body
-    const { message, sessionId } = await req.json()
+   const { message, sessionId, area } = await req.json()
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -34,10 +34,13 @@ export async function POST(req: NextRequest) {
 
     // 3. Creamos sesión nueva o usamos la existente
     let currentSessionId = sessionId
-    if (!currentSessionId) {
+ if (!currentSessionId) {
       const { data, error } = await supabaseAdmin
         .from('sessions')
-        .insert({})
+        .insert({ 
+  area: area || null, 
+  titulo: message.slice(0, 40) + (message.length > 40 ? '...' : '')
+})
         .select()
         .single()
 
