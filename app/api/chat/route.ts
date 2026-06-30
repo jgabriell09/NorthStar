@@ -3,6 +3,7 @@ import groq from '@/lib/groq'
 import { STELLA_SYSTEM_PROMPT, CRISIS_KEYWORDS } from '@/lib/prompts'
 import { supabaseAdmin } from '@/lib/supabase'
 import { ratelimit } from '@/lib/ratelimit'
+import { createClient } from '@/lib/supabase-server'
 
 type Message = {
   role: 'user' | 'assistant'
@@ -21,7 +22,16 @@ export async function POST(req: NextRequest) {
         { status: 429 }
       )
     }
+// Verificamos que el usuario esté autenticado
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Debes iniciar sesión para hablar con Stella' },
+        { status: 401 }
+      )
+    }
     // 2. Leemos el body
    const { message, sessionId, area } = await req.json()
 
@@ -38,9 +48,10 @@ export async function POST(req: NextRequest) {
       const { data, error } = await supabaseAdmin
         .from('sessions')
         .insert({ 
-  area: area || null, 
-  titulo: message.slice(0, 40) + (message.length > 40 ? '...' : '')
-})
+          area: area || null, 
+          titulo: message.slice(0, 40) + (message.length > 40 ? '...' : ''),
+          user_id: user.id
+        })
         .select()
         .single()
 

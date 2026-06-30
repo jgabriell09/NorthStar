@@ -145,19 +145,19 @@ export default function ChatPage() {
       {/* Sidebar */}
       <aside className="w-[260px] border-r border-slate-800 bg-[#081122] flex flex-col overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700">
       <div className="p-6">
- <a href="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm mb-4">
-  ← Inicio
-</a>
-<button
-  onClick={async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    window.location.href = '/auth'
-  }}
-  className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm mb-4"
->
-  Cerrar sesión
-</button>
-  <h1 className="text-2xl font-bold">Northstar</h1>
+  <h1 className="text-2xl font-bold mb-4">Northstar</h1>
+  <a href="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm mb-2">
+    ← Inicio
+  </a>
+  <button
+    onClick={async () => {
+      await fetch('/api/auth/logout', { method: 'POST' })
+      window.location.href = '/auth'
+    }}
+    className="flex items-center gap-2 text-slate-400 hover:text-white transition text-sm"
+  >
+    🚪 Cerrar sesión
+  </button>
 </div>
 
         <div className="px-4">
